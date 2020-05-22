@@ -1,6 +1,6 @@
 # Get the latest packages.
-sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get -y update
+sudo apt-get -y upgrade
 
 # This will be static later on.
 open_server_ip = 34.34.34.34
@@ -17,7 +17,7 @@ sudo sysctl -p
 
 # Adjust IP tables to allow forwarding.
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
-sudo apt-get install iptables-persistent
+sudo apt-get install -y iptables-persistent
 
 # Create a temporary directory for installation media.
 mkdir ~/Installation
@@ -46,7 +46,7 @@ patch -p1 < 05-tunnelblick-openvpn_xorpatch-d.diff
 patch -p1 < 06-tunnelblick-openvpn_xorpatch-e.diff
 
 # Install pre-requisites.
-sudo apt-get install build-essential libssl-dev iproute2 liblz4-dev liblzo2-dev libpam0g-dev libpkcs11-helper1-dev libsystemd-dev resolvconf pkg-config
+sudo apt-get install -y build-essential libssl-dev iproute2 liblz4-dev liblzo2-dev libpam0g-dev libpkcs11-helper1-dev libsystemd-dev resolvconf pkg-config
 
 # Configure IP tables.
 ./configure --enable-systemd --enable-async-push --enable-iproute2
@@ -72,6 +72,9 @@ sudo mkdir -p /usr/share/easy-rsa/3
 # Copy the folders from the extracted tar and copy them over to the created directory.
 sudo cp -rf EasyRSA-3.0.5/* /usr/share/easy-rsa/3
 cd /usr/share/easy-rsa/3
+
+# Sets a baseline for the vars example.
+sudo cp vars.example vars
 
 # Adds the user input to the variables to interact with EasyRSA
 # In fairness these variables are not checked against and can be random.

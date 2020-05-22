@@ -140,7 +140,11 @@ chmod +r tls-crypt.key
 # Should exit the root session. If this is hosted on a then this will be required
 # but it should be a linux server only which is based in root so the interaction
 # earlier on should not be needed as well as this exit.
+
+echo "PLEASE JUST EXIT THE ROOT NOWWWWWW."
+
 exit
+
 
 cd /etc/openvpn
 

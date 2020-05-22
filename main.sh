@@ -17,7 +17,7 @@ sudo sysctl -p
 
 # Adjust IP tables to allow forwarding.
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
-sudo apt-get install -y iptables-persistent
+sudo apt-get install -y build-essential openssl libssl-dev iproute2 liblz4-dev liblzo2-dev libpam0g-dev libpkcs11-helper1-dev libsystemd-dev resolvconf pkg-config unzip cmake iptables-persistent
 
 # Create a temporary directory for installation media.
 mkdir ~/Installation
@@ -31,7 +31,6 @@ tar xvf openvpn-2.4.6.tar.gz
 wget https://github.com/Tunnelblick/Tunnelblick/archive/master.zip
 
 # In order to unzip the file install unzip
-sudo apt-get install -y unzip
 unzip master.zip
 
 # Copy all files from this colder to openvpn directory.
@@ -44,9 +43,6 @@ patch -p1 < 03-tunnelblick-openvpn_xorpatch-b.diff
 patch -p1 < 04-tunnelblick-openvpn_xorpatch-c.diff
 patch -p1 < 05-tunnelblick-openvpn_xorpatch-d.diff
 patch -p1 < 06-tunnelblick-openvpn_xorpatch-e.diff
-
-# Install pre-requisites.
-sudo apt-get install -y build-essential libssl-dev iproute2 liblz4-dev liblzo2-dev libpam0g-dev libpkcs11-helper1-dev libsystemd-dev resolvconf pkg-config
 
 # Configure IP tables.
 ./configure --enable-systemd --enable-async-push --enable-iproute2
@@ -150,7 +146,6 @@ cd /etc/openvpn
 
 # This should be installed on boot but just in case install in the script.
 # The result of the openSSL should be a hash in base64.
-sudo apt-get install -y openssl
 openssh_hash = openssl rand -base64 24
 
 # Not familiar with the cat syntax, hopefully this should pull the variable in.

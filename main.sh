@@ -94,12 +94,12 @@ read easy_rsa_ou
 
 # Set the EasyRSA variables
 cat <<EOF >> vars
-set_var EASYRSA_REQ_COUNTRY	    $easy_rsa_country
-set_var EASYRSA_REQ_PROVINCE    $easy_rsa_province 
-set_var EASYRSA_REQ_CITY        $easy_rsa_city
-set_var EASYRSA_REQ_ORG         $easy_rsa_organisation
-set_var EASYRSA_REQ_EMAIL       $easy_rsa_email
-set_var EASYRSA_REQ_OU          $easy_rsa_ou
+set_var EASYRSA_REQ_COUNTRY     "$easy_rsa_country"
+set_var EASYRSA_REQ_PROVINCE    "$easy_rsa_province" 
+set_var EASYRSA_REQ_CITY        "$easy_rsa_city"
+set_var EASYRSA_REQ_ORG         "$easy_rsa_organisation"
+set_var EASYRSA_REQ_EMAIL       "$easy_rsa_email"
+set_var EASYRSA_REQ_OU          "$easy_rsa_ou"
 EOF
 
 # Next to create the certificates and keys. This may require changing to root.

@@ -90,12 +90,14 @@ echo "Organisation Unit (Useless) Input: "
 read easy_rsa_ou
 
 # Set the EasyRSA variables
+cat <<EOF >> vars
 set_var EASYRSA_REQ_COUNTRY	    $easy_rsa_country
 set_var EASYRSA_REQ_PROVINCE    $easy_rsa_province 
 set_var EASYRSA_REQ_CITY        $easy_rsa_city
 set_var EASYRSA_REQ_ORG         $easy_rsa_organisation
 set_var EASYRSA_REQ_EMAIL       $easy_rsa_email
 set_var EASYRSA_REQ_OU          $easy_rsa_ou
+EOF
 
 # Next to create the certificates and keys. This may require changing to root.
 
@@ -178,15 +180,17 @@ EOF
 # Next to run on SystemD so it has persistence.
 sudo cp ~/Installation/openvpn-2.4.6/distro/systemd/openvpn-server@.service.in /lib/systemd/system/openvpn-server@.server
 
+# Not complete yet.
+
 # Change sbindir to /usr/local/sbin
-cat << EOF >>/lib/systemd/system/openvpn-server@.service
-EOF
+# cat << EOF >>/lib/systemd/system/openvpn-server@.service
+# EOF
 
-# Start openVPN server
-sudo systemctl start openvpn-server@$open_server_ip
-sudo systemctl enable openvpn-server@$open_server_ip
-sudo systemctl status openvpn-server@$open_server_ip
-sudo ss -tulpn | grep 443
+# # Start openVPN server
+# sudo systemctl start openvpn-server@$open_server_ip
+# sudo systemctl enable openvpn-server@$open_server_ip
+# sudo systemctl status openvpn-server@$open_server_ip
+# sudo ss -tulpn | grep 443
 
-# Indicate that the setup is finally complete.
-echo "[Success] Setup is finally complete."
+# # Indicate that the setup is finally complete.
+# echo "[Success] Setup is finally complete."

@@ -25,7 +25,7 @@ cd ~/Installation
 
 # Install targz release of openvpn, this can be modular in the future.
 wget https://swupdate.openvpn.org/community/releases/openvpn-2.4.8.tar.gz
-tar xvf openvpn-2.4.6.tar.gz
+tar xvf openvpn-2.4.8.tar.gz
 
 # Get the Tunnelblick files for the patch.
 wget https://github.com/Tunnelblick/Tunnelblick/archive/master.zip
@@ -34,8 +34,8 @@ wget https://github.com/Tunnelblick/Tunnelblick/archive/master.zip
 unzip master.zip
 
 # Copy all files from this colder to openvpn directory.
-cp Tunnelblick-master/third_party/sources/openvpn/openvpn-2.4.8/patches/*.diff openvpn-2.4.6
-cd openvpn-2.4.6
+cp Tunnelblick-master/third_party/sources/openvpn/openvpn-2.4.8/patches/*.diff openvpn-2.4.8
+cd openvpn-2.4.8
 
 # Apply the patches with the patch command.
 patch -p1 < 02-tunnelblick-openvpn_xorpatch-a.diff
@@ -176,7 +176,7 @@ scramble obfuscate $openssh_hash
 EOF
 
 # Next to run on SystemD so it has persistence.
-sudo cp ~/Installation/openvpn-2.4.6/distro/systemd/openvpn-server@.service.in /lib/systemd/system/openvpn-server@.server
+sudo cp ~/Installation/openvpn-2.4.8/distro/systemd/openvpn-server@.service.in /lib/systemd/system/openvpn-server@.server
 
 # Not complete yet.
 

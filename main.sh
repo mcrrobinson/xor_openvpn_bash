@@ -3,7 +3,7 @@ sudo apt-get -y update
 sudo apt-get -y upgrade
 
 # This will be static later on.
-open_server_ip = 34.34.34.34
+open_server_ip=34.34.34.34
 
 # Append the following to the system file.
 cat <<EOF >>/etc/sysctl.conf
@@ -133,7 +133,7 @@ cd /etc/openvpn
 
 # This should be installed on boot but just in case install in the script.
 # The result of the openSSL should be a hash in base64.
-openssh_hash = openssl rand -base64 24
+openssh_hash=openssl rand -base64 24
 
 # Not familiar with the cat syntax, hopefully this should pull the variable in.
 # The port is currently 443, not sure why this is the case in the example I pulled.

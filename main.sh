@@ -99,53 +99,36 @@ set_var EASYRSA_REQ_OU          "$easy_rsa_ou"
 EOF
 
 # Next to create the certificates and keys. This may require changing to root.
-
-#####################################################
-# TODO This needs to be interactive later on...
-sudo passwd root
-su - 
 cd /usr/share/easy-rsa/3
 
-#####################################################
-
 # Now to create the public key.
-./easyrsa init-pki
-./easyrsa build-ca nopass
+sudo ./easyrsa init-pki
+sudo ./easyrsa build-ca nopass
 
 # This IP can be changed later on. Additionally this may require user interaction.
-./easyrsa gen-req $open_server_ip
-./easyrsa gen-req adminpc nopass
-./easyrsa sign-req client adminpc
-./easyrsa gen-dh
+sudo ./easyrsa gen-req $open_server_ip
+sudo ./easyrsa gen-req adminpc nopass
+sudo ./easyrsa sign-req client adminpc
+sudo ./easyrsa gen-dh
 
 # Required to copy the keys into the OpenVPN directories.
-cp pki/ca.crt /etc/openvpn
-cp pki/dh.pem /etc/openvpn/server
-cp pki/issued/$open_server_ip.crt /etc/openvpn/server
-cp pki/issued/adminpc.crt /etc/openvpn/client
-cp pki/private/ca.key /etc/openvpn
-cp pki/private/$open_server_ip.key /etc/openvpn/server
-cp pki/private/adminpc.key /etc/openvpn/client
+sudo cp pki/ca.crt /etc/openvpn
+sudo cp pki/dh.pem /etc/openvpn/server
+sudo cp pki/issued/$open_server_ip.crt /etc/openvpn/server
+sudo cp pki/issued/adminpc.crt /etc/openvpn/client
+sudo cp pki/private/ca.key /etc/openvpn
+sudo cp pki/private/$open_server_ip.key /etc/openvpn/server
+sudo cp pki/private/adminpc.key /etc/openvpn/client
 
 # Generate the TLS crypt key.
 cd /etc/openvpn
-openvpn --genkey --secret tls-crypt.key
+sudo openvpn --genkey --secret tls-crypt.key
 
 # Need to set permissions to be read only so that a non root user cannot modify files.
-chmod +r ca.crt
-chmod +r client/adminpc.crt
-chmod +r client/adminpc.key
-chmod +r tls-crypt.key
-
-# Should exit the root session. If this is hosted on a then this will be required
-# but it should be a linux server only which is based in root so the interaction
-# earlier on should not be needed as well as this exit.
-
-echo "PLEASE JUST EXIT THE ROOT NOWWWWWW."
-
-exit
-
-
+sudo chmod +r ca.crt
+sudo chmod +r client/adminpc.crt
+sudo chmod +r client/adminpc.key
+sudo chmod +r tls-crypt.key
 cd /etc/openvpn
 
 # This should be installed on boot but just in case install in the script.

@@ -100,7 +100,7 @@ EOF
 
 # Permissions are not working... It would be easy if the root would actually work.
 
-sudo passw root
+sudo passwd root
 su -
 cd /usr/share/easy-rsa/3
 

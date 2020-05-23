@@ -98,7 +98,11 @@ set_var EASYRSA_REQ_EMAIL       "$easy_rsa_email"
 set_var EASYRSA_REQ_OU          "$easy_rsa_ou"
 EOF
 
+# Unable to navigate towards dir due to the fact it is lacking privilages.
+# This can be solved by using sudo su, butttt sudo su has issues while scripting...
+# what a pickle.
 # Next to create the certificates and keys. This may require changing to root.
+sudo chmod -R 755 /usr/share/easy-rsa/3
 cd /usr/share/easy-rsa/3
 
 # Now to create the public key.

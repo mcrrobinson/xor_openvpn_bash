@@ -98,11 +98,10 @@ set_var EASYRSA_REQ_EMAIL       "$easy_rsa_email"
 set_var EASYRSA_REQ_OU          "$easy_rsa_ou"
 EOF
 
-# Unable to navigate towards dir due to the fact it is lacking privilages.
-# This can be solved by using sudo su, butttt sudo su has issues while scripting...
-# what a pickle.
-# Next to create the certificates and keys. This may require changing to root.
-sudo chmod -R 755 /usr/share/easy-rsa/3
+# Permissions are not working... It would be easy if the root would actually work.
+
+sudo passw root
+su -
 cd /usr/share/easy-rsa/3
 
 # Now to create the public key.
@@ -135,9 +134,11 @@ sudo chmod +r client/adminpc.key
 sudo chmod +r tls-crypt.key
 cd /etc/openvpn
 
+exit
+
 # This should be installed on boot but just in case install in the script.
 # The result of the openSSL should be a hash in base64.
-openssh_hash=openssl rand -base64 24
+openssh_hash=$(openssl rand -base64 24)
 
 # Not familiar with the cat syntax, hopefully this should pull the variable in.
 # The port is currently 443, not sure why this is the case in the example I pulled.

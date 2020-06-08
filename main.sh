@@ -1,150 +1,124 @@
-# Get the latest packages.
-sudo apt-get -y update
-sudo apt-get -y upgrade
+# Install updates.
+sudo apt-get update
+sudo apt-get upgrade
 
-# This will be static later on.
-open_server_ip=34.34.34.34
+# Go to root.
+sudo su
 
-# Append the following to the system file.
+# Add lines to the file.
 cat <<EOF >>/etc/sysctl.conf
 net.ipv4.ip_forward=1
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 EOF
 
-# Restart sysctl in order for the changes to take effect.
-sudo sysctl -p
+# Apply changes.
+sysctl -p
 
-# Adjust IP tables to allow forwarding.
+# Exit root.
+exit
+
+# Set the ip tables.
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
-sudo apt-get install -y build-essential openssl libssl-dev iproute2 liblz4-dev liblzo2-dev libpam0g-dev libpkcs11-helper1-dev libsystemd-dev resolvconf pkg-config unzip cmake iptables-persistent
+sudo apt-get install -y iptables-persistent
 
-# Create a temporary directory for installation media.
-mkdir ~/Installation
-cd ~/Installation
+# Create downloads for the wgets.
+mkdir ~/Downloads
+cd ~/Downloads
 
-# Install targz release of openvpn, this can be modular in the future.
-wget https://swupdate.openvpn.org/community/releases/openvpn-2.4.8.tar.gz
-tar xvf openvpn-2.4.8.tar.gz
+wget https://swupdate.openvpn.org/community/releases/openvpn-2.4.9.tar.gz
+tar xvf openvpn-2.4.9.tar.gz
 
-# Get the Tunnelblick files for the patch.
 wget https://github.com/Tunnelblick/Tunnelblick/archive/master.zip
-
-# In order to unzip the file install unzip
+sudo apt-get install -y unzip
 unzip master.zip
 
-# Copy all files from this colder to openvpn directory.
-cp Tunnelblick-master/third_party/sources/openvpn/openvpn-2.4.8/patches/*.diff openvpn-2.4.8
-cd openvpn-2.4.8
+# Copy files to this folder.
+cp Tunnelblick-master/third_party/sources/openvpn/openvpn-2.4.9/patches/*.diff openvpn-2.4.9
+cd openvpn-2.4.9/
 
-# Apply the patches with the patch command.
+# Apply all patches
 patch -p1 < 02-tunnelblick-openvpn_xorpatch-a.diff
 patch -p1 < 03-tunnelblick-openvpn_xorpatch-b.diff
 patch -p1 < 04-tunnelblick-openvpn_xorpatch-c.diff
 patch -p1 < 05-tunnelblick-openvpn_xorpatch-d.diff
 patch -p1 < 06-tunnelblick-openvpn_xorpatch-e.diff
 
-# Configure IP tables.
+# Install prereqs
+sudo apt-get install -y build-essential libssl-dev iproute2 liblz4-dev liblzo2-dev libpam0g-dev libpkcs11-helper1-dev libsystemd-dev resolvconf pkg-config
+
+# Build openvpn
 ./configure --enable-systemd --enable-async-push --enable-iproute2
-
-# Incomplete, no make medium yet.
 make
-
 sudo make install
+
+# Create directories, these may already exist.
 sudo mkdir /etc/openvpn
 sudo mkdir /etc/openvpn/server
 sudo mkdir /etc/openvpn/client
 
-# Navigate back to the installation media folder.
-cd ~/Installation
+cd ~/Downloads
 
-# Download the release of EasyRSA for security purposes when connecting the VPN
-wget https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.5/EasyRSA-nix-3.0.5.tgz
-tar -xvzf EasyRSA-nix-3.0.5.tgz
+# Download Easy-Rsa.
+wget https://github.com/OpenVPN/easy-rsa/archive/v3.0.7.tar.gz
+tar -xvzf v3.0.7.tar.gz
 
-# Create a temporary directory in order to setup easy rsa.
+# Create easy-rsa directories. There always seems to be a clone...
 sudo mkdir -p /usr/share/easy-rsa/3
+sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
+sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3/easyrsa3
 
-# Copy the folders from the extracted tar and copy them over to the created directory.
-sudo cp -rf EasyRSA-3.0.5/* /usr/share/easy-rsa/3
-cd /usr/share/easy-rsa/3
-
-# Sets a baseline for the vars example.
+# Make the example the real file.
+cd /usr/share/easy-rsa/3/easyrsa3
 sudo cp vars.example vars
 
-# Adds the user input to the variables to interact with EasyRSA
-# In fairness these variables are not checked against and can be random.
-# There is no email verification included.
-echo "Country Input:"
-read easy_rsa_country
-echo "Province Input: "
-read easy_rsa_province
-echo "City Input: "
-read easy_rsa_city
-echo "Organisation Input: "
-read easy_rsa_organisation
-echo "Email Input: "
-read easy_rsa_email
-echo "Organisation Unit (Useless) Input: "
-read easy_rsa_ou
+# Go to root.
+sudo su
 
-# Set the EasyRSA variables
+# Add lines to the file.
 cat <<EOF >> vars
-set_var EASYRSA_REQ_COUNTRY     "$easy_rsa_country"
-set_var EASYRSA_REQ_PROVINCE    "$easy_rsa_province" 
-set_var EASYRSA_REQ_CITY        "$easy_rsa_city"
-set_var EASYRSA_REQ_ORG         "$easy_rsa_organisation"
-set_var EASYRSA_REQ_EMAIL       "$easy_rsa_email"
-set_var EASYRSA_REQ_OU          "$easy_rsa_ou"
+set_var EASYRSA_DN "org"
+set_var EASYRSA_REQ_COUNTRY "CN"
+set_var EASYRSA_REQ_PROVINCE "Guangdong"
+set_var EASYRSA_REQ_CITY "Shenzhen"
+set_var EASYRSA_REQ_ORG "Test Org"
+set_var EASYRSA_REQ_EMAIL "test@example.com"
 EOF
 
-# Permissions are not working... It would be easy if the root would actually work.
+# Generate easyrsa.
+./easyrsa init-pki
+./easyrsa build-ca nopass
+./easyrsa gen-req 34.34.34.34 nopass
+./easyrsa sign-req server 34.34.34.34
+./easyrsa gen-req adminpc nopass
+./easyrsa sign-req client adminpc
+./easyrsa gen-dh
 
-sudo passwd root
-su -
-cd /usr/share/easy-rsa/3
+# Copy pki files to the opencpn server and client.
+cp pki/ca.crt /etc/openvpn
+cp pki/dh.pem /etc/openvpn/server
+cp pki/issued/34.34.34.34.crt /etc/openvpn/server
+cp pki/issued/adminpc.crt /etc/openvpn/client
+cp pki/private/ca.key /etc/openvpn
+cp pki/private/34.34.34.34.key /etc/openvpn/server
+cp pki/private/adminpc.key /etc/openvpn/client
 
-# Now to create the public key.
-sudo ./easyrsa init-pki
-sudo ./easyrsa build-ca nopass
-
-# This IP can be changed later on. Additionally this may require user interaction.
-sudo ./easyrsa gen-req $open_server_ip
-sudo ./easyrsa gen-req adminpc nopass
-sudo ./easyrsa sign-req client adminpc
-sudo ./easyrsa gen-dh
-
-# Required to copy the keys into the OpenVPN directories.
-sudo cp pki/ca.crt /etc/openvpn
-sudo cp pki/dh.pem /etc/openvpn/server
-sudo cp pki/issued/$open_server_ip.crt /etc/openvpn/server
-sudo cp pki/issued/adminpc.crt /etc/openvpn/client
-sudo cp pki/private/ca.key /etc/openvpn
-sudo cp pki/private/$open_server_ip.key /etc/openvpn/server
-sudo cp pki/private/adminpc.key /etc/openvpn/client
-
-# Generate the TLS crypt key.
+# Generate encryption key.
 cd /etc/openvpn
-sudo openvpn --genkey --secret tls-crypt.key
+openvpn --genkey --secret tls-crypt.key
 
-# Need to set permissions to be read only so that a non root user cannot modify files.
-sudo chmod +r ca.crt
-sudo chmod +r client/adminpc.crt
-sudo chmod +r client/adminpc.key
-sudo chmod +r tls-crypt.key
+# Give read permissions.
+chmod +r ca.crt
+chmod +r client/adminpc.crt
+chmod +r client/adminpc.key
+chmod +r tls-crypt.key
+
+# Create hash.
 cd /etc/openvpn
-
-exit
-
-# This should be installed on boot but just in case install in the script.
-# The result of the openSSL should be a hash in base64.
 openssh_hash=$(openssl rand -base64 24)
 
-# Not familiar with the cat syntax, hopefully this should pull the variable in.
-# The port is currently 443, not sure why this is the case in the example I pulled.
-# I can understand it if it was a TCP connection but it's under UDP ...
-# Maybe change later on.
-cat <<EOF >> server/$open_server_ip.conf
+# Add scrable hash to the server configuration file.
+cat << EOF > server/34.34.34.34.conf
 port 443
 proto udp
 dev tun
@@ -167,20 +141,44 @@ verb 3
 scramble obfuscate $openssh_hash
 EOF
 
-# Next to run on SystemD so it has persistence.
-sudo cp ~/Installation/openvpn-2.4.8/distro/systemd/openvpn-server@.service.in /lib/systemd/system/openvpn-server@.server
+# Copy files from the downloads to the service.
+sudo cp ~/Downloads/openvpn-2.4.9/distro/systemd/openvpn-server@.service.in /lib/systemd/system/openvpn-server@.service
 
-# Not complete yet.
+# Overwrite current service file to have the actual execstart directory.
+cat << EOF > /lib/systemd/system/openvpn-server@.service
+[Unit]
+Description=OpenVPN service for %I
+After=syslog.target network-online.target
+Wants=network-online.target
+Documentation=man:openvpn(8)
+Documentation=https://community.openvpn.net/openvpn/wiki/Openvpn24ManPage
+Documentation=https://community.openvpn.net/openvpn/wiki/HOWTO
 
-# Change sbindir to /usr/local/sbin
-# cat << EOF >>/lib/systemd/system/openvpn-server@.service
-# EOF
+[Service]
+Type=notify
+PrivateTmp=true
+WorkingDirectory=/etc/openvpn/server
+ExecStart=/usr/local/sbin/openvpn --status %t/openvpn-server/status-%i.log --status-version 2 --suppress-timestamps --confi>
+CapabilityBoundingSet=CAP_IPC_LOCK CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_SETGID CAP_SETUID CAP_SYS_CHROO>
+LimitNPROC=10
+DeviceAllow=/dev/null rw
+DeviceAllow=/dev/net/tun rw
+ProtectSystem=true
+ProtectHome=true
+KillMode=process
+RestartSec=5s
+Restart=on-failure
 
-# # Start openVPN server
-# sudo systemctl start openvpn-server@$open_server_ip
-# sudo systemctl enable openvpn-server@$open_server_ip
-# sudo systemctl status openvpn-server@$open_server_ip
-# sudo ss -tulpn | grep 443
+[Install]
+WantedBy=multi-user.target
+EOF
 
-# # Indicate that the setup is finally complete.
-# echo "[Success] Setup is finally complete."
+exit
+
+# Start service.
+sudo systemctl start openvpn-server@34.34.34.34
+sudo systemctl enable openvpn-server@34.34.34.34
+sudo systemctl status openvpn-server@34.34.34.34
+
+# Show conncetions.
+sudo ss -tulpn | grep 443

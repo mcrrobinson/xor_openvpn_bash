@@ -1,6 +1,6 @@
 # Install updates.
-sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get -y update
+sudo apt-get -y upgrade
 
 # Go to root.
 sudo su
@@ -17,6 +17,10 @@ sysctl -p
 
 # Set the ip tables.
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
+
+# Please exit to leave sudo su
+echo "Please type Exit: "
+
 sudo apt-get install -y iptables-persistent
 
 # Create downloads for the wgets.

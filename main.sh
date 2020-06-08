@@ -62,7 +62,7 @@ tar -xvzf v3.0.7.tar.gz
 
 # Create easy-rsa directories. There always seems to be a clone...
 sudo mkdir -p /usr/share/easy-rsa/3
-# sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
+sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
 sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3/easyrsa3
 
 # Make the example the real file.

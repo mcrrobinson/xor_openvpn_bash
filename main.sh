@@ -15,6 +15,9 @@ EOF
 # Apply changes.
 sysctl -p
 
+# Exit su
+exit
+
 # Set the ip tables.
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
 sudo apt-get install -y iptables-persistent

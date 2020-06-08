@@ -2,6 +2,9 @@
 sudo apt-get -y update
 sudo apt-get -y upgrade
 
+# Read public IP address and use that in the configurations.
+public_ip=$(dig +short myip.opendns.com @resolver1.opendns.com)
+
 # Go to root.
 sudo su
 
@@ -14,9 +17,6 @@ EOF
 
 # Apply changes.
 sysctl -p
-
-# Exit su
-exit
 
 # Set the ip tables.
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
@@ -65,7 +65,6 @@ tar -xvzf v3.0.7.tar.gz
 
 # Create easy-rsa directories. There always seems to be a clone...
 sudo mkdir -p /usr/share/easy-rsa/3
-sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
 sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3/easyrsa3
 
 # Make the example the real file.
@@ -85,8 +84,8 @@ EOF
 # Generate easyrsa.
 ./easyrsa init-pki
 ./easyrsa build-ca nopass
-./easyrsa gen-req 34.34.34.34 nopass
-./easyrsa sign-req server 34.34.34.34
+./easyrsa gen-req $public_ip nopass
+./easyrsa sign-req server $public_ip
 ./easyrsa gen-req adminpc nopass
 ./easyrsa sign-req client adminpc
 ./easyrsa gen-dh
@@ -94,10 +93,10 @@ EOF
 # Copy pki files to the opencpn server and client.
 cp pki/ca.crt /etc/openvpn
 cp pki/dh.pem /etc/openvpn/server
-cp pki/issued/34.34.34.34.crt /etc/openvpn/server
+cp pki/issued/$public_ip.crt /etc/openvpn/server
 cp pki/issued/adminpc.crt /etc/openvpn/client
 cp pki/private/ca.key /etc/openvpn
-cp pki/private/34.34.34.34.key /etc/openvpn/server
+cp pki/private/$public_ip.key /etc/openvpn/server
 cp pki/private/adminpc.key /etc/openvpn/client
 
 # Generate encryption key.
@@ -115,13 +114,13 @@ cd /etc/openvpn
 openssh_hash=$(openssl rand -base64 24)
 
 # Add scrable hash to the server configuration file.
-cat << EOF > server/34.34.34.34.conf
+cat << EOF > server/$public_ip.conf
 port 443
 proto udp
 dev tun
 ca /etc/openvpn/ca.crt
-cert /etc/openvpn/server/34.34.34.34.crt
-key /etc/openvpn/server/34.34.34.34.key
+cert /etc/openvpn/server/$public_ip.crt
+key /etc/openvpn/server/$public_ip.key
 dh /etc/openvpn/server/dh.pem
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist /etc/openvpn/ipp.txt
@@ -171,11 +170,6 @@ WantedBy=multi-user.target
 EOF
 
 # Start service.
-sudo systemctl start openvpn-server@34.34.34.34
-sudo systemctl enable openvpn-server@34.34.34.34
-sudo systemctl status openvpn-server@34.34.34.34
-
-# Show conncetions.
-sudo ss -tulpn | grep 443
-
-exit
+sudo systemctl start openvpn-server@$public_ip
+sudo systemctl enable openvpn-server@$public_ip
+sudo systemctl status openvpn-server@$public_ip

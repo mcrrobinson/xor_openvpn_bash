@@ -15,9 +15,6 @@ EOF
 # Apply changes.
 sysctl -p
 
-# Exit root.
-exit
-
 # Set the ip tables.
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
 sudo apt-get install -y iptables-persistent
@@ -71,9 +68,6 @@ sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3/easyrsa3
 # Make the example the real file.
 cd /usr/share/easy-rsa/3/easyrsa3
 sudo cp vars.example vars
-
-# Go to root.
-sudo su
 
 # Add lines to the file.
 cat <<EOF >> vars
@@ -173,8 +167,6 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
-exit
-
 # Start service.
 sudo systemctl start openvpn-server@34.34.34.34
 sudo systemctl enable openvpn-server@34.34.34.34
@@ -182,3 +174,5 @@ sudo systemctl status openvpn-server@34.34.34.34
 
 # Show conncetions.
 sudo ss -tulpn | grep 443
+
+exit

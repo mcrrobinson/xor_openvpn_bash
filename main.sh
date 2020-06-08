@@ -17,10 +17,6 @@ sysctl -p
 
 # Set the ip tables.
 sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
-
-# Please exit to leave sudo su
-echo "Please type Exit: "
-
 sudo apt-get install -y iptables-persistent
 
 # Create downloads for the wgets.
@@ -66,7 +62,7 @@ tar -xvzf v3.0.7.tar.gz
 
 # Create easy-rsa directories. There always seems to be a clone...
 sudo mkdir -p /usr/share/easy-rsa/3
-sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
+# sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
 sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3/easyrsa3
 
 # Make the example the real file.

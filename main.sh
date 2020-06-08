@@ -30,13 +30,8 @@ cd ~/Downloads
 wget https://swupdate.openvpn.org/community/releases/openvpn-2.4.9.tar.gz
 tar xvf openvpn-2.4.9.tar.gz
 
-# Download Tunnelbrick source.
-wget https://github.com/Tunnelblick/Tunnelblick/archive/master.zip
-sudo apt-get install -y unzip
-unzip master.zip
-
-# Copy files to this folder.
-cp Tunnelblick-master/third_party/sources/openvpn/openvpn-2.4.9/patches/*.diff openvpn-2.4.9
+# Copy patches to this folder.
+cp patches/*.diff openvpn-2.4.9
 cd openvpn-2.4.9/
 
 # Apply all patches

@@ -175,3 +175,21 @@ EOF
 sudo systemctl start openvpn-server@$public_ip
 sudo systemctl enable openvpn-server@$public_ip
 sudo systemctl status openvpn-server@$public_ip
+
+###############################################
+# TODO
+###############################################
+# Change the location of reading in the patches
+# to be local rather than pulling from the
+# master.zip @ tunnelblick.
+#
+# Remove the sudo su once testing makes it's
+# way to Ubuntu Server rather than desktop.
+#
+# Work out why there is a weird directory
+# called easyrsa in the other easyrsa directory
+#
+# Make the script more secure with options
+#
+# Remove EasyRSA prompts, not sure why there
+# are so many.

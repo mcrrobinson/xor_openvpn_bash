@@ -1,7 +1,7 @@
 # Install updates.
-sudo apt-get -y update
-sudo apt-get -y upgrade
-
+apt-get -y update
+apt-get -y upgrade
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 function valid_ip()
 {
@@ -22,7 +22,7 @@ function valid_ip()
 
 # Read public IP address and use that in the configurations.
 collected_ip=$(dig +short myip.opendns.com @resolver1.opendns.com)
-echo -e "############################################################################\n"
+echo -e "\n############################################################################\n"
 echo -e "This will be the IP address used for the server, in most cases it's simply"
 echo -e "the public one being displayed. If you are typical, press enter.\n"
 echo -e "############################################################################\n"
@@ -46,22 +46,19 @@ while true; do
     fi
 done
 
-# Go to root.
-sudo su
-
 # Add lines to the file.
 cat <<EOF >>/etc/sysctl.conf
 net.ipv4.ip_forward=1
-net.ipv6.conf.all.disable_ipv6 = 1
-net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
 EOF
 
 # Apply changes.
 sysctl -p
 
 # Set the ip tables.
-sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
-sudo apt-get install -y iptables-persistent
+iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -o eth0 -j MASQUERADE
+apt-get install -y iptables-persistent
 
 # Create downloads for the wgets.
 mkdir ~/Downloads
@@ -71,13 +68,8 @@ cd ~/Downloads
 wget https://swupdate.openvpn.org/community/releases/openvpn-2.4.9.tar.gz
 tar xvf openvpn-2.4.9.tar.gz
 
-# Download Tunnelbrick source.
-wget https://github.com/Tunnelblick/Tunnelblick/archive/master.zip
-sudo apt-get install -y unzip
-unzip master.zip
-
 # Copy files to this folder.
-cp Tunnelblick-master/third_party/sources/openvpn/openvpn-2.4.9/patches/*.diff openvpn-2.4.9
+cp -r $DIR/patches/*.diff openvpn-2.4.9
 cd openvpn-2.4.9/
 
 # Apply all patches
@@ -88,17 +80,17 @@ patch -p1 < 05-tunnelblick-openvpn_xorpatch-d.diff
 patch -p1 < 06-tunnelblick-openvpn_xorpatch-e.diff
 
 # Install prereqs
-sudo apt-get install -y build-essential libssl-dev iproute2 liblz4-dev liblzo2-dev libpam0g-dev libpkcs11-helper1-dev libsystemd-dev resolvconf pkg-config
+apt-get install -y build-essential libssl-dev iproute2 liblz4-dev liblzo2-dev libpam0g-dev libpkcs11-helper1-dev libsystemd-dev resolvconf pkg-config
 
 # Build openvpn
 ./configure --enable-systemd --enable-async-push --enable-iproute2
 make
-sudo make install
+make install
 
 # Create directories, these may already exist.
-sudo mkdir /etc/openvpn
-sudo mkdir /etc/openvpn/server
-sudo mkdir /etc/openvpn/client
+mkdir /etc/openvpn
+mkdir /etc/openvpn/server
+mkdir /etc/openvpn/client
 
 cd ~/Downloads
 
@@ -107,12 +99,12 @@ wget https://github.com/OpenVPN/easy-rsa/archive/v3.0.7.tar.gz
 tar -xvzf v3.0.7.tar.gz
 
 # Create easy-rsa directories. There always seems to be a clone...
-sudo mkdir -p /usr/share/easy-rsa/3
-sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
+mkdir -p /usr/share/easy-rsa/3
+cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
 
 # Make the example the real file.
 cd /usr/share/easy-rsa/3/easyrsa3
-sudo cp vars.example vars
+cp vars.example vars
 
 # Generate easyrsa.
 ./easyrsa init-pki
@@ -171,7 +163,7 @@ scramble obfuscate $openssh_hash
 EOF
 
 # Copy files from the downloads to the service.
-sudo cp ~/Downloads/openvpn-2.4.9/distro/systemd/openvpn-server@.service.in /lib/systemd/system/openvpn-server@.service
+cp ~/Downloads/openvpn-2.4.9/distro/systemd/openvpn-server@.service.in /lib/systemd/system/openvpn-server@.service
 
 # Overwrite current service file to have the actual execstart directory.
 cat << EOF > /lib/systemd/system/openvpn-server@.service
@@ -203,9 +195,20 @@ WantedBy=multi-user.target
 EOF
 
 # Start service.
-sudo systemctl start openvpn-server@$public_ip
-sudo systemctl enable openvpn-server@$public_ip
-sudo systemctl status openvpn-server@$public_ip
+systemctl start openvpn-server@$public_ip
+systemctl enable openvpn-server@$public_ip
+
+echo -e "\n############################################################################\n"
+echo -e "Server Status: $(systemctl show -p SubState --value openvpn-server@$public_ip)\n"
+echo -e "VPN IP: $public_ip"
+echo -e "OpenSSH Hash: $openssh_hash \n"
+echo -e "Make sure to take note of the location of the keys, you will need them later"
+echo -e "for the client. \n"
+echo -e "CA Cert: /etc/openvpn/ca.crt"
+echo -e "Client Cert: /etc/openvpn/client/adminpc.crt"
+echo -e "Client Private Key: /etc/openvpn/client/adminpc.key"
+echo -e "Server Public Key: /etc/openvpn/tls-crypt.key \n"
+echo -e "############################################################################\n"
 
 ###############################################
 # TODO
@@ -213,8 +216,5 @@ sudo systemctl status openvpn-server@$public_ip
 # Change the location of reading in the patches
 # to be local rather than pulling from the
 # master.zip @ tunnelblick.
-#
-# Remove the sudo su once testing makes it's
-# way to Ubuntu Server rather than desktop.
 #
 # Make the script more secure with options

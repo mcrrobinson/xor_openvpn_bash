@@ -48,8 +48,8 @@ done
 # Add lines to the file.
 cat <<EOF >>/etc/sysctl.conf
 net.ipv4.ip_forward=1
-net.ipv6.conf.all.disable_ipv6 = 1
-net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
 EOF
 
 # Apply changes.
@@ -213,7 +213,6 @@ echo -e "Client Cert: /etc/openvpn/client/adminpc.crt"
 echo -e "Client Private Key: /etc/openvpn/client/adminpc.key"
 echo -e "Server Public Key: /etc/openvpn/tls-crypt.key \n"
 echo -e "############################################################################\n"
-read -p "Press Enter to continue"
 
 ###############################################
 # TODO
@@ -221,8 +220,5 @@ read -p "Press Enter to continue"
 # Change the location of reading in the patches
 # to be local rather than pulling from the
 # master.zip @ tunnelblick.
-#
-# Remove the su once testing makes it's
-# way to Ubuntu Server rather than desktop.
 #
 # Make the script more secure with options

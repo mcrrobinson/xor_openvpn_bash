@@ -1,6 +1,7 @@
 # Install updates.
 apt-get -y update
 apt-get -y upgrade
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 function valid_ip()
 {
@@ -67,13 +68,8 @@ cd ~/Downloads
 wget https://swupdate.openvpn.org/community/releases/openvpn-2.4.9.tar.gz
 tar xvf openvpn-2.4.9.tar.gz
 
-# Download Tunnelbrick source.
-wget https://github.com/Tunnelblick/Tunnelblick/archive/master.zip
-apt-get install -y unzip
-unzip master.zip
-
 # Copy files to this folder.
-cp Tunnelblick-master/third_party/sources/openvpn/openvpn-2.4.9/patches/*.diff openvpn-2.4.9
+cp -r $DIR/patches/*.diff openvpn-2.4.9
 cd openvpn-2.4.9/
 
 # Apply all patches

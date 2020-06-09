@@ -205,6 +205,27 @@ EOF
 # Start service.
 sudo systemctl start openvpn-server@$public_ip
 sudo systemctl enable openvpn-server@$public_ip
+
+# cp pki/ca.crt /etc/openvpn
+# cp pki/dh.pem /etc/openvpn/server
+# cp pki/issued/$public_ip.crt /etc/openvpn/server
+# cp pki/issued/adminpc.crt /etc/openvpn/client
+# cp pki/private/ca.key /etc/openvpn
+# cp pki/private/$public_ip.key /etc/openvpn/server
+# cp pki/private/adminpc.key /etc/openvpn/client
+echo -e "############################################################################\n"
+echo -e "VPN IP: $public_ip"
+echo -e "OpenSSH Hash: $openssh_hash \n"
+echo -e "Make sure to take note of the location of the keys, you will need them later"
+echo -e "for the client. \n"
+echo -e "CA Cert: /etc/openvpn/ca.crt"
+echo -e "Client Cert: /etc/openvpn/client/adminpc.crt"
+echo -e "Client Private Key: /etc/openvpn/client/adminpc.key"
+echo -e "Server Public Key: /etc/openvpn/tls-crypt.key \n"
+echo -e "############################################################################\n"
+read -p "Press Enter to continue"
+
+# Show the status of the server.
 sudo systemctl status openvpn-server@$public_ip
 
 ###############################################

@@ -2,8 +2,49 @@
 sudo apt-get -y update
 sudo apt-get -y upgrade
 
+
+function valid_ip()
+{
+    local  ip=$1
+    local  stat=1
+
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OIFS=$IFS
+        IFS='.'
+        ip=($ip)
+        IFS=$OIFS
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+            && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
+
 # Read public IP address and use that in the configurations.
-public_ip=$(dig +short myip.opendns.com @resolver1.opendns.com)
+collected_ip=$(dig +short myip.opendns.com @resolver1.opendns.com)
+echo -e "############################################################################\n"
+echo -e "This will be the IP address used for the server, in most cases it's simply"
+echo -e "the public one being displayed. If you are typical, press enter.\n"
+echo -e "############################################################################\n"
+
+# If they click enter will save the variable as the default.
+while true; do
+    read -p "Enter server IP: [$collected_ip] " public_ip
+    if [ -z "$public_ip" ];
+        then 
+            public_ip=$collected_ip
+            break
+        else
+
+        # If they input an IP check the validity.
+        if [[ "$(basename $0 .sh)" == 'main' ]]; then
+            if valid_ip $public_ip;
+                then break;
+                else echo -e "That was not a valid IP, if you don't know what you're doing, simply click enter.\n";
+            fi
+        fi
+    fi
+done
 
 # Go to root.
 sudo su
@@ -72,16 +113,6 @@ sudo cp -rf easy-rsa-3.0.7/* /usr/share/easy-rsa/3
 # Make the example the real file.
 cd /usr/share/easy-rsa/3/easyrsa3
 sudo cp vars.example vars
-
-# Add lines to the file.
-cat <<EOF >> vars
-set_var EASYRSA_DN "org"
-set_var EASYRSA_REQ_COUNTRY "CN"
-set_var EASYRSA_REQ_PROVINCE "Guangdong"
-set_var EASYRSA_REQ_CITY "Shenzhen"
-set_var EASYRSA_REQ_ORG "Test Org"
-set_var EASYRSA_REQ_EMAIL "test@example.com"
-EOF
 
 # Generate easyrsa.
 ./easyrsa init-pki
@@ -186,10 +217,4 @@ sudo systemctl status openvpn-server@$public_ip
 # Remove the sudo su once testing makes it's
 # way to Ubuntu Server rather than desktop.
 #
-# Work out why there is a weird directory
-# called easyrsa in the other easyrsa directory
-#
 # Make the script more secure with options
-#
-# Remove EasyRSA prompts, not sure why there
-# are so many.
